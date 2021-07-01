@@ -1,36 +1,15 @@
+mod compile_86;
+mod parse;
+
+use compile_86::compile;
+use parse::parser;
+use parse::Instrs;
 use std::io;
+
+use crate::compile_86::init_file;
 #[allow(unused)]
 
 
-#[derive(Debug, PartialEq)]
-enum Instrs {
-    Inc,
-    Dec,
-    Left,
-    Right,
-    Print,
-    Read,
-    Lp,
-    LpEnd,
-}
-
-fn parse(s: String) -> Vec<Instrs> {
-    let mut xs: Vec<Instrs> = Vec::new(); 
-    for c in s.chars() {
-        match c {
-            '>' => xs.push(Instrs::Right),
-            '<' => xs.push(Instrs::Left),
-            '+' => xs.push(Instrs::Inc),
-            '-' => xs.push(Instrs::Dec),
-            '.' => xs.push(Instrs::Print),
-            ',' => xs.push(Instrs::Read),
-            '[' => xs.push(Instrs::Lp),
-            ']' => xs.push(Instrs::LpEnd),
-             _  => {} 
-        }
-    }
-    xs
-}
 
 fn interp(xs: Vec<Instrs>) -> u8 {
     let mut mem = [0 as u8; 30000];
@@ -82,11 +61,18 @@ fn interp(xs: Vec<Instrs>) -> u8 {
 }
 
 
-fn main() {
-    let stex1 = include_str!("./examples/helloworld.bf");
-    let ex1 = stex1.to_string();
-    let vex1 = parse(ex1);
-    let _x = interp(vex1);
+fn main() -> () {
+    // let stex1 = include_str!("./examples/helloworld.bf");
+    // let ex1 = stex1.to_string();
+    // let vex1 = parser(ex1);
+    // let _whatever = init_file().unwrap();
+    // let _x = interp(vex1);
+
+        let xs = parser(String::from(">++>++>--"));
+        for i in &xs {
+            println!("{:?}", i)
+        }
+        let _a = compile(xs);
 }
 
 
@@ -95,27 +81,25 @@ mod tests {
     use super::*;
     #[test]
     fn test_parse1() {
-        let xs = parse(String::from(">"));
+        let xs = parser(String::from(">"));
         assert_eq!(xs[0], Instrs::Right)
     }
     #[test]
     fn test_parse2() {
-        let xs = parse(String::from(">     \n \t <"));
+        let xs = parser(String::from(">     \n \t <"));
         assert_eq!(xs[1], Instrs::Left)
     }
     #[test]
     fn test_interp1() {
-        let xs = parse(String::from("++"));
+        let xs = parser(String::from("++"));
         assert_eq!(2, interp(xs));
     }
 
     #[test]
     fn test_interp2() {
-        let xs = parse(String::from("++>+++"));
+        let xs = parser(String::from("++>+++"));
         assert_eq!(3, interp(xs));
     }
-
-
 
 }
 
