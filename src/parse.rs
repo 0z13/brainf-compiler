@@ -10,7 +10,6 @@ pub enum Instrs {
     Lp,
     LpEnd,
 }
-
 pub fn parser(s: String) -> Vec<Instrs> {
     let mut xs: Vec<Instrs> = Vec::new(); 
     for c in s.chars() {
@@ -28,3 +27,5 @@ pub fn parser(s: String) -> Vec<Instrs> {
     }
     xs
 }
+
+

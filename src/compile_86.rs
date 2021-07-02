@@ -6,9 +6,9 @@ use std::fs::File;
 use std::path::Path;
 
 pub fn init_file () ->  std::io::Result<File> {
-    let path = Path::new("./a.out");
+    let path = Path::new("entry.s");
     let mut f = std::fs::File::create(path)?;
-    f.write_all(b"  .text\n  .globl main\nmain:\n    pushq %rbp\n    movq %rsp, %rbp\n");
+    f.write_all(b".section .text\n    .global entry\nentry:\n    pushq %rbp\n    movq %rsp, %rbp\n");
     Ok(f)
 }
 
@@ -53,5 +53,11 @@ pub fn compile(inp: Vec<Instrs>) -> std::io::Result<()> {
             }
         }
     }
+    // todo
+    // install nasm 
+    // call c entry
+    // try to mess with cargo pipeline
+
+    f.write_all(b"    retq");
     Ok(())
 }
