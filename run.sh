@@ -1,4 +1,4 @@
 #!/bin/bash
-gcc -c entry.s -o entry.o
-gcc entry.o main.c
+clang -c -masm=intel entry.s -o entry.o
+clang -Wno-implicit-function-declaration entry.o main.c
 ./a.out
