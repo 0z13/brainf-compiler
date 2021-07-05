@@ -8,27 +8,26 @@ use std::path::Path;
 pub fn init_file () ->  std::io::Result<File> {
     let path = Path::new("entry.s");
     let mut f = std::fs::File::create(path)?;
-    f.write_all(b".section .text\n    .global entry\nentry:\n    pushq %rbp\n    movq %rsp, %rbp\n");
+    f.write_all(b".bss\nlcomm ARRAY 30000\n.text\n.global start\nstart:\n");
     Ok(f)
 }
 
 
 pub fn compile(inp: Vec<Instrs>) -> std::io::Result<()> {
-    let mut ptr:i32 = 0;
     let mut f = init_file().expect("io err");
-    
+    let mut instr_list: Vec<String> = Vec::new(); 
     for i in inp {
         match i {
             Instrs::Inc => {
-                let instrs = format!("    addq $1, {}(%rsp)\n", ptr);
-                f.write_all(instrs.as_bytes());
+                let instr = format!("    add $1, %r12\n");
+                instr_list.push(instr);
             } 
             Instrs::Dec => {
-                let instrs = format!("    subq $1, {}(%rsp)\n", ptr);
-                f.write_all(instrs.as_bytes());
+                let instr = format!("    subq $1, %rsp\n");
+                instr_list.push(instr);
             } 
             Instrs::Right => {
-                ptr -= 8;
+                
             }
             Instrs::Left => {
                 ptr += 8;
