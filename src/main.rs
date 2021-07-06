@@ -68,7 +68,7 @@ fn main() -> () {
     // let _whatever = init_file().unwrap();
     // let _x = interp(vex1);
 
-        let xs = parser(String::from(">++>++>--"));
+        let xs = parser(String::from("++-+"));
         for i in &xs {
             println!("{:?}", i)
         }

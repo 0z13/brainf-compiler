@@ -8,7 +8,7 @@ use std::path::Path;
 pub fn init_file () ->  std::io::Result<File> {
     let path = Path::new("entry.s");
     let mut f = std::fs::File::create(path)?;
-    f.write_all(b".bss\nlcomm ARRAY 30000\n.text\n.global start\nstart:\n");
+    f.write_all(b".bss\n.lcomm ARRAY, 30000\n.text\n.global start\nstart:\n");
     Ok(f)
 }
 
@@ -19,27 +19,22 @@ pub fn compile(inp: Vec<Instrs>) -> std::io::Result<()> {
     for i in inp {
         match i {
             Instrs::Inc => {
-                let instr = format!("    add $1, %r12\n");
+                let instr = format!("    addb $1, (%r12)\n");
                 instr_list.push(instr);
             } 
             Instrs::Dec => {
-                let instr = format!("    subq $1, %rsp\n");
+                let instr = format!("    subb $1, (%r12)\n");
                 instr_list.push(instr);
             } 
             Instrs::Right => {
-                
+                let instr = format!("    addb (%r12) $1, 1\n");
+                instr_list.push(instr);
             }
             Instrs::Left => {
-                ptr += 8;
-                if ptr > 0 {
-                    panic!("Buffer overflow!");
-                }
+                let instr = format!("    addb (%r12) $1, 1\n");
+                instr_list.push(instr);
             }
             Instrs::Read => {
-                let mut s = String::from(""); // User input
-                std::io::stdin().read_line(&mut s).expect("input is invalid");
-                let tmp = format!("    movq ${} {}($rsp)", s, ptr);
-                f.write_all(tmp.as_bytes());
             }
             Instrs::Print => {
                 // How do i print in assembly?
@@ -52,11 +47,19 @@ pub fn compile(inp: Vec<Instrs>) -> std::io::Result<()> {
             }
         }
     }
+    let l1 = format!("    movb  (%r12), %rax\n");
+    let l2 = format!("    retq");
+    instr_list.push(l1);
+    instr_list.push(l2);
+    for i in &instr_list {
+        f.write_all(i.as_bytes());
+    }
+ 
+
     // todo
     // install nasm 
     // call c entry
     // try to mess with cargo pipeline
 
-    f.write_all(b"    retq");
     Ok(())
 }
