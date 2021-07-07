@@ -17,6 +17,10 @@ pub fn compile(inp: Vec<Instrs>) -> std::io::Result<()> {
     let mut f = init_file().expect("io err");
     let mut instr_list: Vec<String> = Vec::new(); 
     let mut curr_pos:i32 = -8;
+    let mut curr_index:usize = 0;
+    let mut arr: [bool; 100] = [false; 100];
+    arr[0] = true;
+
     for i in inp {
         match i {
             Instrs::Inc => {
@@ -29,29 +33,47 @@ pub fn compile(inp: Vec<Instrs>) -> std::io::Result<()> {
             } 
             Instrs::Right => {
                 curr_pos = curr_pos - 8;
-                let instr = format!("    movq $0 {}(%rbp)\n", curr_pos);
-                instr_list.push(instr);
+                curr_index += 1;
+                if (!arr[curr_index]) {
+                    let instr = format!("    movq $0, {}(%rbp)\n", curr_pos);
+                    instr_list.push(instr);
+                    arr[curr_index] = true
+                } else {
+                    // no zero-init
+                }
             }
             Instrs::Left => {
                 curr_pos = curr_pos + 8;
-                let instr = format!("    movq $0 {}(%rbp)\n", curr_pos);
-                instr_list.push(instr);
+                curr_index -= 1;
+                if (!arr[curr_index]) {
+                    let instr = format!("    movq $0, {}(%rbp)\n", curr_pos);
+                    instr_list.push(instr);
+                    arr[curr_index] = true
+                } else {
+                   // no need to 0 initialize     
+                }
             }
             Instrs::Read => {
+                // sigh
             }
             Instrs::Print => {
+                // sigh
             }
-            Instrs::Lp => {
-                // I have to do some branching
+            Instrs::Lp(index) => {
+                let instr = 
+                format!("    cmpq $0, {}(%rbp)\n    je LOOP_END_{}\n    LOOP_START_{}:\n", curr_pos, index, index);
+                instr_list.push(instr);
             }
-            Instrs::LpEnd => {
-                // I have to do some branching
+            Instrs::LpEnd(index) => {
+                let instr = 
+                format!("    cmpq $0, {}(%rbp)\n    jne LOOP_START_{}\n    LOOP_END_{}:\n", curr_pos, index, index);
+                instr_list.push(instr);
             }
         }
     }
                 
     let l1 = format!("    movq  {}(%rbp), %rax\n    popq %rbp\n", curr_pos);
-    let l2 = format!("    ret");
+    let l2 = format!("    ret\n");
     instr_list.push(l1);
     instr_list.push(l2);
     for i in &instr_list {

@@ -7,12 +7,13 @@ pub enum Instrs {
     Right,
     Print,
     Read,
-    Lp,
-    LpEnd,
+    Lp(usize),
+    LpEnd(usize),
 }
 pub fn parser(s: String) -> Vec<Instrs> {
     let mut xs: Vec<Instrs> = Vec::new(); 
-    for c in s.chars() {
+    let mut lbl = 0;
+    for  c in s.chars() {
         match c {
             '>' => xs.push(Instrs::Right),
             '<' => xs.push(Instrs::Left),
@@ -20,8 +21,11 @@ pub fn parser(s: String) -> Vec<Instrs> {
             '-' => xs.push(Instrs::Dec),
             '.' => xs.push(Instrs::Print),
             ',' => xs.push(Instrs::Read),
-            '[' => xs.push(Instrs::Lp),
-            ']' => xs.push(Instrs::LpEnd),
+            '[' => xs.push(Instrs::Lp(lbl)),
+            ']' => {xs.push(Instrs::LpEnd(lbl));
+                    lbl += 1 //no nesting in the goonsquad compiler
+            }
+
              _  => {} 
         }
     }

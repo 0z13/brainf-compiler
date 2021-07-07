@@ -41,14 +41,14 @@ fn interp(xs: Vec<Instrs>) -> u8 {
                 let v:u8= s.parse().expect("Not integer input.");
                 mem[ptr] = v;
             }
-            Instrs::Lp => {
+            Instrs::Lp(x) => {
                 lps = iptr;
                 if mem[ptr] == 0 {
-                    assert!(xs[0] != Instrs::LpEnd);
+                    assert!(xs[0] != Instrs::LpEnd(x));
                     iptr = lpe;
                 }
             }
-            Instrs::LpEnd => {
+            Instrs::LpEnd(_) => {
                 lpe = iptr;
                 if mem[ptr] != 0 {
                     iptr = lps;
@@ -68,7 +68,7 @@ fn main() -> () {
     // let _whatever = init_file().unwrap();
     // let _x = interp(vex1);
 
-        let xs = parser(String::from("++-+"));
+        let xs = parser(include_str!("./examples/seven.bf").to_string());
         for i in &xs {
             println!("{:?}", i)
         }
