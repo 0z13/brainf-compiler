@@ -1,12 +1,13 @@
-.bss
-.lcomm ARRAY, 30000
-.text
 .global start
+.text
 start:
-    mov %r12, offset ARRAY
-    addb $1, (%r12)
-    addb $1, (%r12)
-    subb $1, (%r12)
-    addb $1, (%r12)
-    movb  %r12, %al
-    retq
+    pushq %rbp
+    movq %rsp, %rbp
+    movq  $0, -8(%rbp)
+    addq $1, -8(%rbp)
+    addq $1, -8(%rbp)
+    subq $1, -8(%rbp)
+    addq $1, -8(%rbp)
+    movq  -8(%rbp), %rax
+    popq %rbp
+    ret

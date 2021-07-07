@@ -3,7 +3,7 @@
 extern int entry() asm("start");
 
 int main(int argc, char** argv) { 
-  int result = start();
-  printf("res: %d\n", result);
+  long result = start();
+  printf("res: %ld \n", result);
   return 0;
 }
