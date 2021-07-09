@@ -10,35 +10,61 @@ use std::path::Path;
 fn init_file () ->  std::io::Result<File> {
     let path = Path::new("entry_risc.s");
     let mut f = std::fs::File::create(path)?;
-    f.write_all(b".global start\n.text\nstart:\n");
+    f.write_all(b".data:\nmemory: .space 30000\n\n\n.text\nmain:\n    la s0, memory\n")?;
     Ok(f)
 }
+// RISC-V Brainfuck compiler 
+// written for the venus intrepeter
+// available at https://venus.cs61c.org/
 
 
-pub fn compile_riscv(instrs: Vec<Instrs>) -> std::io::Result {
+pub fn compile(instrs: Vec<Instrs>) -> std::io::Result<()> {
+    let mut f:File = init_file()?;
     let mut stack_size = 0;
-    let instr_list: Vec<String> = Vec![];
+    let mut instr_list: Vec<String> = Vec::new(); 
     for i in instrs {
         match i {
-            Instr::Inc => {
-                let ins = format!("lw x9 {}(sp)\n   addi x9 x9 1\n      sw {}(sp) x9\n", stack_size, stack_size); // temporary reg x9, maybe that's wrong? calle/caller thingi
+            Instrs::Inc => {
+                let ins = "    addi s0, s0, 1\n".to_string();
                 instr_list.push(ins)
             }
-            Instr::Dec => {
-                let ins = format!("lw x9 {}(sp)\n   addi x9 x9 -1\n      sw {}(sp) x9\n", stack_size, stack_size); // temporary reg x9, maybe that's wrong? calle/caller thingi
+            Instrs::Dec => {
+                let ins = "    addi s0, s0, -1\n".to_string();
                 instr_list.push(ins)
             }
-            Instr::Right => {
-                let ins = format!("    addi sp, sp, -8\n    ");
-                stack_size -= 4
-                // Maybe i just add 8 bytes to the stack every time, but
-                // allocate only 4?
-                // how do i keep the stack quadword aligned?/
+            Instrs::Right => {
+                let ins = format!("    lbu s1, (s0)\n    addi s1, s1, 1\n    sb s1, (s0)\n");
+                instr_list.push(ins)
             }
+            Instrs::Left => {
+                let ins = format!("    lbu s1, (s0)\n    addi s1, s1, -1\n    sb s1, (s0)\n");
+                instr_list.push(ins)
+            }
+            Instrs::Print => {
+                let ins = format!("    addi a0, x0, 1\n    addi a1, s0, 0\n    ecall\n");
+                instr_list.push(ins);
+            }
+            Instrs::Read => {
+                // eh
+            }
+            Instrs::Lp(_c) => {
+                // loop start
+            }
+            Instrs::LpEnd(_c) => {
+                // lp end
+            }
+            
         }
     }
 
+    // ugly but whatever
+	let ins1 = format!("    addi 	a0, x0, 10\n");
+	let ins2 = format!("    ecall\n\n");
+    instr_list.push(ins1);
+    instr_list.push(ins2);
 
-    
+    for i in &instr_list {
+        f.write_all(i.as_bytes())?
+    }
     Ok(())
 }

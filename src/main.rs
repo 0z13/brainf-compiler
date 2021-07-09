@@ -1,12 +1,11 @@
 mod compile_86;
+mod compile_riscv;
 mod parse;
 
 use compile_86::compile;
 use parse::parser;
 use parse::Instrs;
 use std::io;
-
-use crate::compile_86::init_file;
 #[allow(unused)]
 
 
@@ -73,6 +72,11 @@ fn main() -> () {
             println!("{:?}", i)
         }
         let _a = compile(xs);
+        
+
+
+        let testcase= parser(String::from("++++.>++."));
+        compile_riscv::compile(testcase);
 }
 
 
